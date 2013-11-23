@@ -2,6 +2,7 @@ from flask_oauth import OAuth
 from flask import Flask
 from flask import session, url_for, redirect, render_template, request, flash
 import urllib2
+import json
 
 app = Flask(__name__)
 oauth = OAuth()
@@ -48,8 +49,10 @@ def oauth_authorized(resp):
 
 @app.route("/")
 def index():
-    data = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%blah",data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).data
-    return render_template("home.html", data = data)
+    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23blah&lang=en",data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
+    nicedata = json.loads(result)
+    
+    return render_template("home.html", data = nicedata['statuses'][0]['text'])
 
 
 
