@@ -55,12 +55,22 @@ def index():
     tweets = []
     for i in range(0,10):
         tweets.append(nicedata['statuses'][i]['text'])
+        print separateHashtags(tweets[i])
 
     tweets = '<br><br>'.join(tweets)
     tweets = Markup(tweets)
     
+
     return render_template("home.html", data = tweets)#nicedata['statuses'][0]['text'])
 
+
+def separateHashtags(tweet):
+    copy = tweet.split('#')
+    for i in range(1,len(copy)):
+        j = copy[i].split(' ')
+        copy[i] = j[0]
+
+    return copy[1:]
 
 
 if __name__=="__main__":
