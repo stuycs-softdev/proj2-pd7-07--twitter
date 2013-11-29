@@ -49,14 +49,24 @@ def oauth_authorized(resp):
 
 @app.route("/")
 def index():
-    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23YOLOSWAG&lang=en",data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
+    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23YOLOSWAG&lang=en&count=100",data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
     nicedata = json.loads(result)
     
     tweets = []
-    for i in range(0,10):
-        tweets.append(nicedata['statuses'][i]['text'])
-        print separateHashtags(tweets[i])
-
+    numhashtags = 0
+    i = 0
+    while numhashtags < 10 and i < len(nicedata['statuses']):
+        hashtags = separateHashtags(nicedata['statuses'][i]['text'])
+        if len(hashtags) == 1:
+            i+=1
+        elif (numhashtags + (len(hashtags) - 1)) <= 10:
+            tweets.append(nicedata['statuses'][i]['text'])
+            numhashtags += (len(hashtags) - 1)
+            i+=1
+        else:
+            i+=1
+            
+        
     tweets = '<br><br>'.join(tweets)
     tweets = Markup(tweets)
     
