@@ -61,7 +61,7 @@ def oauth_authorized(resp):
 @app.route("/", methods = ['GET','POST'])
 def home():
     if request.method == "GET":
-        return render_template(home.html)
+        return render_template("home.html")
     else:
         start = request.form['start']
         return redirect(url_for('game'))
@@ -101,7 +101,7 @@ def highscore():
     if (numSeconds > dictWorst["time"]) and scores.count() >= 50:
         return redirect(url_for("home"))
     else:
-        if request.method = "GET":
+        if request.method == "GET":
             return render_template("highscore.html")
         else:
             return redirect(url_for("leaderboard"))
@@ -113,7 +113,7 @@ def leaderboard():
     scores.insert(score)
     cursor = db.scores.find(limit=50).sort("time")
     results = [line for line in cursor]
-    if request.method = "GET":
+    if request.method == "GET":
         return render_template("leaderboard.html", data=results)
     else:
         return redirect(url_for("home"))
