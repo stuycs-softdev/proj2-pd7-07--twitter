@@ -13,9 +13,8 @@ client = MongoClient()
 db = client['highscores']
 scores = db['scores']
 
-#unneccessary declarations
-#username = ""
-#start = ""
+username = ""
+start = ""
 
 numClicks = 0
 numSeconds = 0
@@ -63,13 +62,13 @@ def home():
     if request.method == "GET":
         return render_template("home.html")
     else:
-        start = request.form['start']
+        start = str(request.form['start'])
         return redirect(url_for('game'))
     
 
 @app.route("/game")
 def game():
-    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23%s&lang=en&count=100"%start,data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
+    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(start),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
     nicedata = json.loads(result)
     
     tweets = []
@@ -102,19 +101,19 @@ def highscore():
         return redirect(url_for("home"))
     else:
         if request.method == "GET":
-            return render_template("highscore.html")
+            return render_template("username.html")
         else:
+            username = request.form["username"]
             return redirect(url_for("leaderboard"))
 
 @app.route("/leaderboard", methods = ['GET','POST'])
 def leaderboard():
-    username = request.form["username"]
     score = {"user": username, "numclicks": numClicks, "time": numSeconds, "date": datetime.datetime.utcnow()}
     scores.insert(score)
     cursor = db.scores.find(limit=50).sort("time")
     results = [line for line in cursor]
     if request.method == "GET":
-        return render_template("leaderboard.html", data=results)
+        return render_template("highscores.html", data=results)
     else:
         return redirect(url_for("home"))
 
