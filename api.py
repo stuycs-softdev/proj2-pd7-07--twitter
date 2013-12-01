@@ -76,6 +76,8 @@ def game():
     tweets = []
     numhashtags = 0
     i = 0
+    allhashtags = []
+
     while numhashtags < 10 and i < len(nicedata['statuses']):
         hashtags = separateHashtags(nicedata['statuses'][i]['text'])
         if len(hashtags) <= 1:
@@ -84,6 +86,10 @@ def game():
             tweets.append(nicedata['statuses'][i]['text'])
             numhashtags += (len(hashtags) - 1)
             i+=1
+
+            for tag in hashtags:
+                if tag.lower() != start.lower():
+                    allhashtags.append(tag)
         else:
             i+=1
             
@@ -91,7 +97,7 @@ def game():
     tweets = Markup(tweets)
     
     print "start: " + start
-    return render_template("game.html", data = tweets, start = start)#nicedata['statuses'][0]['text'])
+    return render_template("game.html", data = tweets, start = start, hashtags = allhashtags)
 
 
 @app.route("/highscore", methods = ['GET','POST'])
