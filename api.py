@@ -104,12 +104,12 @@ def highscore():
             return render_template("username.html")
         else:
             username = request.form["username"]
+            score = {"user": username, "numclicks": numClicks, "time": numSeconds, "date": datetime.datetime.utcnow()}
+            scores.insert(score)
             return redirect(url_for("leaderboard"))
 
 @app.route("/leaderboard", methods = ['GET','POST'])
 def leaderboard():
-    score = {"user": username, "numclicks": numClicks, "time": numSeconds, "date": datetime.datetime.utcnow()}
-    scores.insert(score)
     cursor = db.scores.find(limit=50).sort("time")
     results = [line for line in cursor]
     if request.method == "GET":
