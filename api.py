@@ -15,7 +15,8 @@ scores = db['scores']
 
 username = ""
 start = ""
-
+current = ""
+end = ""
 numClicks = 0
 numSeconds = 0
 
@@ -60,17 +61,22 @@ def oauth_authorized(resp):
 @app.route("/", methods = ['GET','POST'])
 def home():
     global start
+    global current
     if request.method == "GET":
         return render_template("home.html")
     else:
         start = str(request.form['start'])
+        current = start
         return redirect(url_for('game'))
     
 
-@app.route("/game")
+@app.route("/game", methods = ['GET','POST'])
 def game():
     global start
-    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(start),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
+    global current
+    global end
+    global numClicks
+    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(current),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
     nicedata = json.loads(result)
     
     tweets = []
@@ -88,7 +94,7 @@ def game():
             i+=1
 
             for tag in hashtags:
-                if tag.lower() != start.lower():
+                if tag.lower() != current.lower():
                     allhashtags.append(tag)
         else:
             i+=1
@@ -96,9 +102,12 @@ def game():
     tweets = '<br><br>'.join(tweets)
     tweets = Markup(tweets)
     
-    print "start: " + start
-    return render_template("game.html", data = tweets, start = start, hashtags = allhashtags)
-
+    if request.method == "GET":
+        return render_template("game.html", data = tweets, start = start, current = current, end = end, hashtags = allhashtags)
+    else:
+        current = request.form['button']
+        numClicks += 1
+        return redirect(url_for('game'))
 
 @app.route("/highscore", methods = ['GET','POST'])
 def highscore():
