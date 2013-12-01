@@ -113,7 +113,7 @@ def leaderboard():
     cursor = db.scores.find(limit=50).sort("time")
     results = [line for line in cursor]
     if request.method == "GET":
-        return render_template("highscores.html", data=results)
+        return render_template("highscores.html", scores=results)
     else:
         return redirect(url_for("home"))
 

@@ -14,7 +14,7 @@ rel="stylesheet" type = "text/css" media="screen"/>
 
 {% for score in scores %}
 
-user: {{score.user}}  time: {{score.time}} <br>
+user: {{score.user}} ~~~ time: {{score.time}} <br>
 
 {% endfor %}
 
