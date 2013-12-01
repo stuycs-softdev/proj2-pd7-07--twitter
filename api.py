@@ -59,6 +59,7 @@ def oauth_authorized(resp):
 
 @app.route("/", methods = ['GET','POST'])
 def home():
+    global start
     if request.method == "GET":
         return render_template("home.html")
     else:
@@ -68,6 +69,7 @@ def home():
 
 @app.route("/game")
 def game():
+    global start
     result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(start),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
     nicedata = json.loads(result)
     
@@ -76,7 +78,7 @@ def game():
     i = 0
     while numhashtags < 10 and i < len(nicedata['statuses']):
         hashtags = separateHashtags(nicedata['statuses'][i]['text'])
-        if len(hashtags) == 1:
+        if len(hashtags) <= 1:
             i+=1
         elif (numhashtags + (len(hashtags) - 1)) <= 10:
             tweets.append(nicedata['statuses'][i]['text'])
@@ -85,12 +87,11 @@ def game():
         else:
             i+=1
             
-        
     tweets = '<br><br>'.join(tweets)
     tweets = Markup(tweets)
     
-
-    return render_template("game.html", data = tweets)#nicedata['statuses'][0]['text'])
+    print "start: " + start
+    return render_template("game.html", data = tweets, start = start)#nicedata['statuses'][0]['text'])
 
 
 @app.route("/highscore", methods = ['GET','POST'])

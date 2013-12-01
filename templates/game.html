@@ -13,9 +13,11 @@ rel="stylesheet" type = "text/css" media="screen"/>
 <h1 class = "big purple font"> Start Hashtag: {{start}} End Hashtag: {{end}}</h1>
 <div class = "font container">
 {{data}}
+
 {% for hashtag in hashtags %}
 <a href=url_for('game')>{{hashtag}}</a>
 {% endfor %}
+
 </div>
 
 <link href = 'http://fonts.googleapis.com/css?family=Poiret+One' rel =
