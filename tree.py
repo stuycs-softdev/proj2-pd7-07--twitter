@@ -3,21 +3,26 @@
 
 class node(object):
 
-	def __init__(self, value, maxvalue, level):
+	def __init__(self, value, level):
 		self.value = value
-		self.maxvalue = maxvalue
 		self.level = level
 		children = [0] * maxvalue
 
-	def setvalue(val):
+	def setvalue(self, val):
 		self.value = val
 
-	def getvalue():
+	def getvalue(self):
 		return self.value
 
-	def setchild(pos,insert):
+	def setchild(self, pos,insert):
 		if isinstance(insert,node) and pos > 0 and pos < maxvalue:
 			children[pos] = insert
+
+	def createchild(self, pos, value):
+		children[pos] = node(value, self.level + 1)
+
+	def getchild(self, pos):
+		return children[pos]
 	
 class  tree(object):
 
@@ -33,9 +38,13 @@ class  tree(object):
 		self.numberofnodes += 1
 		path = [0] * level
 		for x in xrange(level,0,-1):
-			path[level] = pos/self.branchespernode
+			print pos/self.branchespernode
+			path[x-1] = pos/self.branchespernode
 			pos /= self.branchespernode
-		print path
+
+		
+		
+
 
 
 	def getnode(pos):
@@ -45,4 +54,4 @@ class  tree(object):
 		return numberofnodes
 
 cat = tree(0,3)
-cat.addnode(3,9)
+cat.addnode(4,28)
