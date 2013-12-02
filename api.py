@@ -25,6 +25,8 @@ numClicks = 0
 numSeconds = ""
 startingTime = time()
 
+db.scores.remove()
+
 twitter = oauth.remote_app('twitter',
     base_url='https://api.twitter.com/1/',
     request_token_url='https://api.twitter.com/oauth/request_token',
@@ -136,18 +138,30 @@ def game():
 
 @app.route("/highscore", methods = ['GET','POST'])
 def highscore():
-    cursor = db.scores.find(limit=50).sort("time", -1)
-    dictWorst = cursor[0]
-    if (numSeconds > dictWorst["time"]) and scores.count() >= 50:
-        return redirect(url_for("home"))
-    else:
-        if request.method == "GET":
-            return render_template("username.html",time=numSeconds,clicks=numClicks)
+    global numSeconds
+    global numClicks
+    if scores.count() > 50:
+        cursor = db.scores.find(limit=50).sort("time", -1)
+        dictWorst = cursor[0]
+        if (numSeconds > int(dictWorst["time"])):
+            return redirect(url_for("home"))
+        elif (numSeconds == int(dictWorst["time"])) and (numClicks >= int(dictWorst["numClicks"])):
+            return redirect(url_for("home"))
         else:
-            username = request.form["username"]
-            score = {"user": username, "numclicks": numClicks, "time": numSeconds}
-            scores.insert(score)
-            return redirect(url_for("leaderboard"))
+            return highscoreHelper()
+    else:
+        return highscoreHelper()
+
+def highscoreHelper():
+    global numSeconds
+    global numClicks
+    if request.method == "GET":
+        return render_template("username.html",time=numSeconds,clicks=numClicks)
+    else:
+        username = request.form["username"]
+        score = {"user": username, "numclicks": numClicks, "time": numSeconds}
+        scores.insert(score)
+        return redirect(url_for("leaderboard"))
 
 @app.route("/leaderboard", methods = ['GET','POST'])
 def leaderboard():
@@ -172,7 +186,7 @@ def generateEnd():
     global start
     global current
     search = start
-    for j in range(0,3):
+    for j in range(0,1):
         result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(search),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
         nicedata = json.loads(result)
 
