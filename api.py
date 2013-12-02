@@ -16,8 +16,9 @@ scores = db['scores']
 
 username = ""
 start = ""
+previous = ""
 current = ""
-end = ""
+end = "iseeyou"
 numClicks = 0
 numSeconds = 0
 
@@ -74,6 +75,7 @@ def home():
 @app.route("/game", methods = ['GET','POST'])
 def game():
     global start
+    global previous
     global current
     global end
     global numClicks
@@ -111,14 +113,19 @@ def game():
             
     tweets = '<br><br>'.join(tweets)
     tweets = Markup(tweets)
-    allhashtags.append(current)
+    if current != start:
+        allhashtags.append(previous)
     
     if request.method == "GET":
         return render_template("game.html", data = tweets, start = start, current = current, end = end, hashtags = allhashtags)
     else:
+        previous = current
         current = request.form['button']
         numClicks += 1
-        return redirect(url_for('game'))
+        if current == end:
+            return redirect(url_for('highscore'))
+        else:
+            return redirect(url_for('game'))
 
 @app.route("/highscore", methods = ['GET','POST'])
 def highscore():
