@@ -17,7 +17,7 @@ rel="stylesheet" type = "text/css" media="screen"/>
 hashtag list </h3>
 <h4 class = "small font"> Number of Clicks: {{numClicks}} </h4>
 <form method = "post">
-<button type="submit" name="button" value="restart" class="btn btn-default">Restart</button>
+<button type="submit" name="button" value="reset" class="btn btn-default">Restart</button>
 </form> <br>
 <div class = "container">
 {{data}}

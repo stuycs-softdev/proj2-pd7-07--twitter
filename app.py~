@@ -151,7 +151,7 @@ def game():
         allhashtags.append(previous)
     
     if request.method == "GET":
-        return render_template("game.html", data = tweets, start = start, current = current, end = end, hashtags = allhashtags, numClicks = numClicks)
+        return render_template("game.html", data = tweets, start = start, current = current, end = end, hashtags = allhashtags)
     else:
         button = request.form['button']
         if button == "restart":
