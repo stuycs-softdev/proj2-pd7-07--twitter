@@ -212,7 +212,7 @@ def generateEnd():
     global start
     global current
     search = start
-    for j in range(0,2):
+    for j in range(0,3):
         result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(search),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
         nicedata = json.loads(result)
 
