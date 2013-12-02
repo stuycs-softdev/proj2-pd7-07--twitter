@@ -4,7 +4,9 @@ from flask import session, url_for, redirect, render_template, request, flash
 import urllib2
 import json
 from pymongo import MongoClient
-import datetime
+from time import time
+from random import choice
+
 
 app = Flask(__name__)
 oauth = OAuth()
@@ -15,9 +17,12 @@ scores = db['scores']
 
 username = ""
 start = ""
-
+previous = ""
+current = ""
+end = ""
 numClicks = 0
 numSeconds = 0
+startingTime = 0
 
 twitter = oauth.remote_app('twitter',
     base_url='https://api.twitter.com/1/',
@@ -59,61 +64,137 @@ def oauth_authorized(resp):
 
 @app.route("/", methods = ['GET','POST'])
 def home():
+    global start
+    global previous
+    global current
+    global end
+    global numClicks
+    global numSeconds
+    global startingTime
+    start = end = previous = current = ""
+    numClicks = numSeconds = startingTime = 0
     if request.method == "GET":
         return render_template("home.html")
     else:
         start = str(request.form['start'])
+        current = start
+        startingTime = time()
         return redirect(url_for('game'))
-    
 
-@app.route("/game")
+@app.route("/error", methods = ['GET','POST'])
+def error():
+    global start
+    global previous
+    global current
+    global end
+    global numClicks
+    global numSeconds
+    global startingTime
+    start = end = previous = current = ""
+    numClicks = numSeconds = startingTime = 0
+    if request.method == "GET":
+        return "ERROR: No results. Please try a new search!<br>" + render_template("home.html")
+    else:
+        start = str(request.form['start'])
+        current = start
+        startingTime = time()
+        return redirect(url_for('game'))
+
+@app.route("/game", methods = ['GET','POST'])
 def game():
-    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(start),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
+    global start
+    global previous
+    global current
+    global end
+    global numClicks
+    global numSeconds
+    global startingTime
+
+    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(current),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
     nicedata = json.loads(result)
     
     tweets = []
     numhashtags = 0
     i = 0
+    allhashtags = []
+
+    if len(nicedata['statuses']) == 0:
+        return redirect(url_for('error'))
+
+    if end == "":
+        end = generateEnd()
+
     while numhashtags < 10 and i < len(nicedata['statuses']):
         hashtags = separateHashtags(nicedata['statuses'][i]['text'])
-        if len(hashtags) == 1:
+        if len(hashtags) <= 1:
             i+=1
-        elif (numhashtags + (len(hashtags) - 1)) <= 10:
-            tweets.append(nicedata['statuses'][i]['text'])
-            numhashtags += (len(hashtags) - 1)
-            i+=1
+        elif (numhashtags + len(hashtags) - 1) <= 10:
+            addTweet = True
+            for x in range (0, len(hashtags)):
+                if hashtags[x].lower() in allhashtags:
+                    addTweet = False
+            if addTweet == False:
+                i+=1
+            else:
+                tweets.append(nicedata['statuses'][i]['text'])
+                numhashtags += (len(hashtags) - 1)
+                for tag in hashtags:
+                    if tag.lower() != current.lower() and tag.lower() != previous.lower():
+                        allhashtags.append(tag.lower())
         else:
             i+=1
             
-        
     tweets = '<br><br>'.join(tweets)
     tweets = Markup(tweets)
+    if previous != "":
+        allhashtags.append(previous)
     
-
-    return render_template("game.html", data = tweets)#nicedata['statuses'][0]['text'])
-
+    if request.method == "GET":
+        return render_template("game.html", data = tweets, start = start, current = current, end = end, hashtags = allhashtags)
+    else:
+        previous = current
+        current = request.form['button']
+        numClicks += 1
+        if current.lower() == end.lower():
+            numSeconds = int(time() - startingTime)
+            return redirect(url_for('highscore'))
+        else:
+            return redirect(url_for('game'))
 
 @app.route("/highscore", methods = ['GET','POST'])
 def highscore():
-    cursor = db.scores.find(limit=50).sort("time", -1)
-    dictWorst = cursor[0]
-    if (numSeconds > dictWorst["time"]) and scores.count() >= 50:
-        return redirect(url_for("home"))
-    else:
-        if request.method == "GET":
-            return render_template("username.html")
+    global numSeconds
+    global numClicks
+    if scores.count() > 50:
+        cursor = db.scores.find(limit=50).sort([("time", -1), ("numClicks",-1)])
+        results = [line for line in cursor]
+        dictWorst = results[0]
+        if (numSeconds > int(dictWorst["time"])):
+            return redirect(url_for("home"))
+        elif (numSeconds == int(dictWorst["time"])) and (numClicks >= int(dictWorst["numClicks"])):
+            return redirect(url_for("home"))
         else:
-            username = request.form["username"]
-            return redirect(url_for("leaderboard"))
+            return highscoreHelper()
+    else:
+        return highscoreHelper()
+
+def highscoreHelper():
+    global numSeconds
+    global numClicks
+    if request.method == "GET":
+        return render_template("username.html",time=numSeconds,clicks=numClicks)
+    else:
+        username = request.form["username"]
+        score = {"user": username, "numclicks": numClicks, "time": numSeconds}
+        scores.insert(score)
+        return redirect(url_for("leaderboard"))
 
 @app.route("/leaderboard", methods = ['GET','POST'])
 def leaderboard():
-    score = {"user": username, "numclicks": numClicks, "time": numSeconds, "date": datetime.datetime.utcnow()}
-    scores.insert(score)
-    cursor = db.scores.find(limit=50).sort("time")
+    cursor = db.scores.find(limit=50).sort([("time",1), ("numClicks",1)])
     results = [line for line in cursor]
     if request.method == "GET":
-        return render_template("highscores.html", data=results)
+        return render_template("highscores.html", scores=results)
     else:
         return redirect(url_for("home"))
 
@@ -127,7 +208,43 @@ def separateHashtags(tweet):
     return copy[1:]
 
 
+def generateEnd():
+    global start
+    global current
+    search = start
+    for j in range(0,3):
+        result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(search),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
+        nicedata = json.loads(result)
+
+
+        numhashtags = 0
+        i = 0
+        allhashtags = []
+
+        while numhashtags < 10 and i < len(nicedata['statuses']):
+            hashtags = separateHashtags(nicedata['statuses'][i]['text'])
+            if len(hashtags) <= 1:
+                i+=1
+            elif (numhashtags + len(hashtags) - 1) <= 10:
+                addTweet = True
+                for x in range (0, len(hashtags)):
+                    if hashtags[x].lower() in allhashtags:
+                        addTweet = False
+                if addTweet == False:
+                    i+=1
+                else:
+                    numhashtags += (len(hashtags) - 1)
+                    for tag in hashtags:
+                        if tag.lower() != current.lower() and tag.lower() != previous.lower():
+                            allhashtags.append(tag.lower())
+            else:
+                i+=1
+
+        search = choice(allhashtags)
+    return search
+
+
 if __name__=="__main__":
     app.debug=True
     app.secret_key = 'super secret'
-    app.run(host='0.0.0.0',port=5000)
+    app.run(host='0.0.0.0',port=7007)

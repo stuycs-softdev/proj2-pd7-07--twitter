@@ -12,7 +12,18 @@ rel="stylesheet" type = "text/css" media="screen"/>
 <body>
 <h1 class = "big font"> High Scores!</h1>
 
-{{scores}}
+{% for score in scores %}
+
+user: {{score.user}}  time: {{score.time}} <br>
+
+{% endfor %}
+
+<br>
+<br>
+
+<form method = "post">
+<button type="submit" class="btn btn-default">Play Again</button>
+</form>
 
 <link href = 'http://fonts.googleapis.com/css?family=Poiret+One' rel =
   'stylesheet' type = 'text/css'> </link>
