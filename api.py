@@ -15,7 +15,8 @@ scores = db['scores']
 
 username = ""
 start = ""
-
+current = ""
+end = ""
 numClicks = 0
 numSeconds = 0
 
@@ -59,39 +60,61 @@ def oauth_authorized(resp):
 
 @app.route("/", methods = ['GET','POST'])
 def home():
+    global start
+    global current
     if request.method == "GET":
         return render_template("home.html")
     else:
         start = str(request.form['start'])
+        current = start
         return redirect(url_for('game'))
     
 
-@app.route("/game")
+@app.route("/game", methods = ['GET','POST'])
 def game():
-    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(start),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
+    global start
+    global current
+    global end
+    global numClicks
+    result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(current),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
     nicedata = json.loads(result)
     
     tweets = []
     numhashtags = 0
     i = 0
+    allhashtags = []
+
     while numhashtags < 10 and i < len(nicedata['statuses']):
         hashtags = separateHashtags(nicedata['statuses'][i]['text'])
-        if len(hashtags) == 1:
+        if len(hashtags) <= 1:
             i+=1
         elif (numhashtags + (len(hashtags) - 1)) <= 10:
             tweets.append(nicedata['statuses'][i]['text'])
             numhashtags += (len(hashtags) - 1)
             i+=1
+
+            for tag in hashtags:
+                addHashtag = True
+                if tag.lower() != current.lower():
+                    for alreadyInList in allhashtags:
+                        if tag.lower() == alreadyInList.lower():
+                            addHashtag = False
+                            break
+                    if addHashtag:
+                        allhashtags.append(tag)
         else:
             i+=1
             
-        
     tweets = '<br><br>'.join(tweets)
     tweets = Markup(tweets)
+    allhashtags.append(current)
     
-
-    return render_template("game.html", data = tweets)#nicedata['statuses'][0]['text'])
-
+    if request.method == "GET":
+        return render_template("game.html", data = tweets, start = start, current = current, end = end, hashtags = allhashtags)
+    else:
+        current = request.form['button']
+        numClicks += 1
+        return redirect(url_for('game'))
 
 @app.route("/highscore", methods = ['GET','POST'])
 def highscore():
@@ -104,16 +127,16 @@ def highscore():
             return render_template("username.html")
         else:
             username = request.form["username"]
+            score = {"user": username, "numclicks": numClicks, "time": numSeconds, "date": datetime.datetime.utcnow()}
+            scores.insert(score)
             return redirect(url_for("leaderboard"))
 
 @app.route("/leaderboard", methods = ['GET','POST'])
 def leaderboard():
-    score = {"user": username, "numclicks": numClicks, "time": numSeconds, "date": datetime.datetime.utcnow()}
-    scores.insert(score)
     cursor = db.scores.find(limit=50).sort("time")
     results = [line for line in cursor]
     if request.method == "GET":
-        return render_template("highscores.html", data=results)
+        return render_template("highscores.html", scores=results)
     else:
         return redirect(url_for("home"))
 

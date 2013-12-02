@@ -10,7 +10,7 @@ rel="stylesheet" type = "text/css" media="screen"/>
 </head>
 
 <body>
-<h1 class = "big purple font"> Start Hashtag: {{start}} Current Hashtag: {{current}} End Hashtag: {{end}}</h1>
+<h1 class = "big purple font"> Start Hashtag: {{start}} End Hashtag: {{end}}</h1>
 <div class = "font container">
 {{data}}
 
