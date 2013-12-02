@@ -50,20 +50,37 @@ class node(object):
 	def __str__(self):
 		return self.value
 	
+
+
 class  tree(object):
 
 
-
+	#main class
+	#arguements should be self explanitory
 	def __init__(self, rootvalue, branchespernode):
 		self.numberofnodes = 1
 		self.root = node(rootvalue, branchespernode, 0)
 		self.childnodelist = []
 		self.branchespernode = branchespernode
 
+	#The tree object returns the node at it's root
 	def getroot(self):
 		return self.root
 
-	#pos has range [0,(branchespernode^level)-1]
+	#adds a new node into the tree
+	#this is kinda buggy
+	#When it's done, the only prerequisite to run is that the node above it is set
+	#usage: treeobject.addnode(level, position, value)
+	#for level, 0 is thre root, with each subsequent level below it is one higher
+	#pos has range [0,(branchespernode^level)-1] - be careful with this, an out of range value will crash the program
+	#the left-most node has a pos of 0 in each level
+	#so a tree with the pos values of each node looks like:
+	#			0
+	#		   / \
+	#		  0   1
+	#        / \ / \
+	#       0  1 2  3
+	#value is the contents of the new node
 	def addnode(self,level, pos, value):
 		self.numberofnodes += 1
 		path = [0] * level
@@ -83,9 +100,7 @@ class  tree(object):
 		print parent
 		parent.createchild(pos,value)
 
-	def getnode(pos):
-		pass
-
+	#return the total number of nodes in the tree
 	def getnumnodes():
 		return numberofnodes
 
