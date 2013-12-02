@@ -13,8 +13,7 @@ rel="stylesheet" type = "text/css" media="screen"/>
 <h1 class = "big purple font"> Congratulations, you completed one
 challenge! </h1>
 
-Time: {{time}} seconds
-<br>
+Time: {{time}}
 Number of Clicks: {{clicks}}
 
 <form method ="post">

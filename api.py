@@ -5,6 +5,7 @@ import urllib2
 import json
 from pymongo import MongoClient
 import datetime
+from time import time
 from random import choice
 
 
@@ -21,7 +22,8 @@ previous = ""
 current = ""
 end = ""
 numClicks = 0
-numSeconds = 0
+numSeconds = ""
+startingTime = time()
 
 twitter = oauth.remote_app('twitter',
     base_url='https://api.twitter.com/1/',
@@ -82,6 +84,8 @@ def game():
     global current
     global end
     global numClicks
+    global numSeconds
+    global startingTime
     if end == "":
         end = generateEnd()
 
@@ -125,6 +129,7 @@ def game():
         current = request.form['button']
         numClicks += 1
         if current.lower() == end.lower():
+            numSeconds = int(time() - startingTime)
             return redirect(url_for('highscore'))
         else:
             return redirect(url_for('game'))
@@ -137,10 +142,10 @@ def highscore():
         return redirect(url_for("home"))
     else:
         if request.method == "GET":
-            return render_template("username.html")
+            return render_template("username.html",time=numSeconds,clicks=numClicks)
         else:
             username = request.form["username"]
-            score = {"user": username, "numclicks": numClicks, "time": numSeconds, "date": datetime.datetime.utcnow()}
+            score = {"user": username, "numclicks": numClicks, "time": numSeconds}
             scores.insert(score)
             return redirect(url_for("leaderboard"))
 
