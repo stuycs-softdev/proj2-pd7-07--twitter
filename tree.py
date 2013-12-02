@@ -1,30 +1,52 @@
-#this will be the python code that will manage the tree datastructure
 #Shaan Sheikh
 
+#read the comments for the ranges carfully. I didn't code in error correction (yet)
+#misusing something will lead to an error
+#addnode() in tree is buggy
+
+#Node Class
 class node(object):
 
+	#python's equivalent of the main class. Initialize by node(value,numchildren,level)
+	#where:
+	#value is the contents of the node
+	#numchildren is the number of childred the node will have. This will be 10 in our case
+	#level is which level of the tree the node is on, with the root being 0
 	def __init__(self, value, numchildren, level):
 		self.value = value
 		self.level = level
 		self.numchildren = numchildren
 		self.children = [0] * numchildren
 
+	#changes the value of the node
 	def setvalue(self, val):
 		self.value = val
 
+	#returns the value of the node
 	def getvalue(self):
 		return self.value
 
+	#if you have 2 node and want to set one as a child of the other, use this function
+	#node1.setchild(pos,node2)
+	#where pos is which of the children you want node2 to be
+	#pos has a range of [0,numchildren-1]
 	def setchild(self, pos,insert):
 		if isinstance(insert,node) and pos > 0 and pos < numchildren:
 			self.children[pos] = insert
 
+	#Node spawns a new child node with a value of 'value'
+	#pos has range [0,numchildren-1]
 	def createchild(self, pos, value):
 		self.children[pos] = node(value, self.numchildren, self.level + 1)
 
+	#returns a node that's in 'pos' position
+	#returns 0 if there is none
+	#pos has range [0,numchildren-1]
 	def getchild(self, pos):
 		return self.children[pos]
 
+	#overrides print functionality
+	#returns the value of the node
 	def __str__(self):
 		return self.value
 	
