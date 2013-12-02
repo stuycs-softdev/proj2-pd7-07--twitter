@@ -171,12 +171,12 @@ def highscore():
     global numSeconds
     global numClicks
     if scores.count() > 20:
-        cursor = db.scores.find(limit=20).sort([("time", -1), ("numClicks",-1)])
+        cursor = db.scores.find(limit=20).sort([("time", -1), ("numclicks",-1)])
         results = [line for line in cursor]
         dictWorst = results[0]
         if (numSeconds > int(dictWorst["time"])):
             return redirect(url_for("home"))
-        elif (numSeconds == int(dictWorst["time"])) and (numClicks >= int(dictWorst["numClicks"])):
+        elif (numSeconds == int(dictWorst["time"])) and (numClicks >= int(dictWorst["numclicks"])):
             return redirect(url_for("home"))
         else:
             return highscoreHelper()
@@ -196,8 +196,9 @@ def highscoreHelper():
 
 @app.route("/leaderboard", methods = ['GET','POST'])
 def leaderboard():
-    cursor = db.scores.find(limit=20).sort([("time",1), ("numClicks",1)])
+    cursor = db.scores.find(limit=20).sort([("time",1), ("numclicks",1)])
     results = [line for line in cursor]
+    print results
     if request.method == "GET":
         return render_template("highscores.html", scores=results)
     else:
