@@ -5,6 +5,7 @@ import urllib2
 import json
 from pymongo import MongoClient
 import datetime
+from random import choice
 
 app = Flask(__name__)
 oauth = OAuth()
@@ -76,6 +77,9 @@ def game():
     global current
     global end
     global numClicks
+    if end == "":
+        end = generateEnd()
+
     result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(current),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
     nicedata = json.loads(result)
     
@@ -148,6 +152,43 @@ def separateHashtags(tweet):
         copy[i] = j[0]
 
     return copy[1:]
+
+
+def generateEnd():
+    global start
+    global current
+    search = start
+    for j in range(0,5):
+        result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(search),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
+        nicedata = json.loads(result)
+
+
+        numhashtags = 0
+        i = 0
+        allhashtags = []
+
+        while numhashtags < 10 and i < len(nicedata['statuses']):
+            hashtags = separateHashtags(nicedata['statuses'][i]['text'])
+            if len(hashtags) <= 1:
+                i+=1
+            elif (numhashtags + (len(hashtags) - 1)) <= 10:
+                numhashtags += (len(hashtags) - 1)
+                i+=1
+
+                for tag in hashtags:
+                    addHashtag = True
+                    if tag.lower() != current.lower():
+                        for alreadyInList in allhashtags:
+                            if tag.lower() == alreadyInList.lower():
+                                addHashtag = False
+                                break
+                        if addHashtag:
+                            allhashtags.append(tag)
+            else:
+                i+=1
+        print allhashtags
+        search = choice(allhashtags)
+    return search
 
 
 if __name__=="__main__":
