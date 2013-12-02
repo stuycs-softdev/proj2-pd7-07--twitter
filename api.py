@@ -106,7 +106,7 @@ def game():
                 tweets.append(nicedata['statuses'][i]['text'])
                 numhashtags += (len(hashtags) - 1)
                 for tag in hashtags:
-                    if tag.lower() != current.lower():
+                    if tag.lower() != current.lower() and tag.lower() != previous.lower():
                         allhashtags.append(tag.lower())
         else:
             i+=1
