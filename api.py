@@ -7,6 +7,7 @@ from pymongo import MongoClient
 import datetime
 from random import choice
 
+
 app = Flask(__name__)
 oauth = OAuth()
 
@@ -18,7 +19,7 @@ username = ""
 start = ""
 previous = ""
 current = ""
-end = "iseeyou"
+end = ""
 numClicks = 0
 numSeconds = 0
 
@@ -94,20 +95,19 @@ def game():
         hashtags = separateHashtags(nicedata['statuses'][i]['text'])
         if len(hashtags) <= 1:
             i+=1
-        elif (numhashtags + (len(hashtags) - 1)) <= 10:
-            tweets.append(nicedata['statuses'][i]['text'])
-            numhashtags += (len(hashtags) - 1)
-            i+=1
-
-            for tag in hashtags:
-                addHashtag = True
-                if tag.lower() != current.lower():
-                    for alreadyInList in allhashtags:
-                        if tag.lower() == alreadyInList.lower():
-                            addHashtag = False
-                            break
-                    if addHashtag:
-                        allhashtags.append(tag)
+        elif (numhashtags + len(hashtags)) <= 10:
+            addTweet = True
+            for x in range (0, len(hashtags)):
+                if hashtags[x].lower() in allhashtags:
+                    addTweet = False
+            if addTweet == False:
+                i+=1
+            else:
+                tweets.append(nicedata['statuses'][i]['text'])
+                numhashtags += (len(hashtags) - 1)
+                for tag in hashtags:
+                    if tag.lower() != current.lower():
+                        allhashtags.append(tag.lower())
         else:
             i+=1
             
@@ -122,7 +122,7 @@ def game():
         previous = current
         current = request.form['button']
         numClicks += 1
-        if current == end:
+        if current.lower() == end.lower():
             return redirect(url_for('highscore'))
         else:
             return redirect(url_for('game'))
@@ -165,7 +165,7 @@ def generateEnd():
     global start
     global current
     search = start
-    for j in range(0,5):
+    for j in range(0,3):
         result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(search),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
         nicedata = json.loads(result)
 
