@@ -65,6 +65,8 @@ def oauth_authorized(resp):
 def home():
     global start
     global current
+    global end
+    end = ""
     if request.method == "GET":
         return render_template("home.html")
     else:
