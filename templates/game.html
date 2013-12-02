@@ -13,12 +13,15 @@ rel="stylesheet" type = "text/css" media="screen"/>
 <h1 class = "big purple font"> Your goal is to get here: {{end}}</h1>
 <h1 class = "big purple font"> Start hashtag: {{start}}  Current
 hashtag: {{current}}</h1>
+<h3> Note: the previous hashtag can always be found at the end of the
+hashtag list </h3>
+<h4> Number of Clicks: {{numClicks}} </h4>
 <div class = "container">
 {{data}}
 
 <br><br>
 
-Hashtags to select:
+<div class = "purple font"> Hashtags to select: </div>
 <form method = "post">
 {% for hashtag in hashtags %}
 #<input type = "submit" name = "button" value = {{hashtag}}>
