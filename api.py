@@ -94,13 +94,20 @@ def game():
             i+=1
 
             for tag in hashtags:
+                addHashtag = True
                 if tag.lower() != current.lower():
-                    allhashtags.append(tag)
+                    for alreadyInList in allhashtags:
+                        if tag.lower() == alreadyInList.lower():
+                            addHashtag = False
+                            break
+                    if addHashtag:
+                        allhashtags.append(tag)
         else:
             i+=1
             
     tweets = '<br><br>'.join(tweets)
     tweets = Markup(tweets)
+    allhashtags.append(current)
     
     if request.method == "GET":
         return render_template("game.html", data = tweets, start = start, current = current, end = end, hashtags = allhashtags)
