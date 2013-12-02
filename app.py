@@ -124,11 +124,11 @@ def game():
     if end == "":
         end = generateEnd()
 
-    while numhashtags < 10 and i < len(nicedata['statuses']):
+    while numhashtags < 5 and i < len(nicedata['statuses']):
         hashtags = separateHashtags(nicedata['statuses'][i]['text'])
         if len(hashtags) <= 1:
             i+=1
-        elif (numhashtags + len(hashtags) - 1) <= 10:
+        elif (numhashtags + len(hashtags) - 1) <= 5:
             addTweet = True
             for x in range (0, len(hashtags)):
                 if hashtags[x].lower() in allhashtags:
@@ -137,9 +137,10 @@ def game():
                 i+=1
             else:
                 tweets.append(nicedata['statuses'][i]['text'])
-                numhashtags += (len(hashtags) - 1)
+ #               numhashtags += (len(hashtags) - 1)
                 for tag in hashtags:
                     if tag.lower() != current.lower() and tag.lower() != previous.lower():
+                        numhashtags += 1
                         allhashtags.append(tag.lower())
         else:
             i+=1
@@ -165,8 +166,8 @@ def game():
 def highscore():
     global numSeconds
     global numClicks
-    if scores.count() > 50:
-        cursor = db.scores.find(limit=50).sort([("time", -1), ("numClicks",-1)])
+    if scores.count() > 20:
+        cursor = db.scores.find(limit=20).sort([("time", -1), ("numClicks",-1)])
         results = [line for line in cursor]
         dictWorst = results[0]
         if (numSeconds > int(dictWorst["time"])):
@@ -191,7 +192,7 @@ def highscoreHelper():
 
 @app.route("/leaderboard", methods = ['GET','POST'])
 def leaderboard():
-    cursor = db.scores.find(limit=50).sort([("time",1), ("numClicks",1)])
+    cursor = db.scores.find(limit=20).sort([("time",1), ("numClicks",1)])
     results = [line for line in cursor]
     if request.method == "GET":
         return render_template("highscores.html", scores=results)
@@ -221,11 +222,11 @@ def generateEnd():
         i = 0
         allhashtags = []
 
-        while numhashtags < 10 and i < len(nicedata['statuses']):
+        while numhashtags < 5 and i < len(nicedata['statuses']):
             hashtags = separateHashtags(nicedata['statuses'][i]['text'])
             if len(hashtags) <= 1:
                 i+=1
-            elif (numhashtags + len(hashtags) - 1) <= 10:
+            elif (numhashtags + len(hashtags) - 1) <= 5:
                 addTweet = True
                 for x in range (0, len(hashtags)):
                     if hashtags[x].lower() in allhashtags:
@@ -233,10 +234,11 @@ def generateEnd():
                 if addTweet == False:
                     i+=1
                 else:
-                    numhashtags += (len(hashtags) - 1)
+                    #numhashtags += (len(hashtags) - 1)
                     for tag in hashtags:
                         if tag.lower() != current.lower() and tag.lower() != previous.lower():
                             allhashtags.append(tag.lower())
+                            numhashtags += 1
             else:
                 i+=1
 
