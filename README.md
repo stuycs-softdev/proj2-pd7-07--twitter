@@ -11,8 +11,13 @@ Team:
 * Maia Ezratty
 * Shaan Sheikh
 
+Requirements to Run:
+* flask_oauth
+* pymongo
+* mongodb
+* you must run mongod in another terminal 
 
-Bugs/Notes
+Bugs/Notes:
 * The minimum number of steps from start to end hashtag is three. However, it is conceivable that you could get there in two or even one step. Our program burrows two levels down, but this does not ensure that the same hashtag cannot be found one or zero levels down.
 * Clicking on certain hashtags causes a "UnicodeEncodeError". We believe this occurs when you click on a hashtag containing an emoji.
 * It is the user's job to strategize. We don't recommend "burrowing more than two levels down," but our program does allow it.
