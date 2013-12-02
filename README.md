@@ -5,7 +5,7 @@ Give #Twitter any hashtag you want. It will search Twitter for that hashtag, tak
 
 
 Team:
-Christopher Burke
-Jeremy Karson
-Maia Ezratty
-Shaan Sheikh
+* Christopher Burke
+* Jeremy Karson
+* Maia Ezratty
+* Shaan Sheikh
