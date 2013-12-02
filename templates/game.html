@@ -10,12 +10,15 @@ rel="stylesheet" type = "text/css" media="screen"/>
 </head>
 
 <body>
-<h1 class = "big purple font"> Your goal is to get here: {{end}}</h1>
-<h1 class = "big purple font"> Start hashtag: {{start}}  Current
-hashtag: {{current}}</h1>
-<h3> Note: the previous hashtag can always be found at the end of the
+<h1 class = "big purple font"> Your goal is to get here: #{{end}}</h1>
+<h1 class = "big purple font"> Start hashtag: #{{start}} </h1>
+<h1 class = "big purple font"> Currenthashtag: #{{current}}</h1>
+<h3 class = "small font"> Note: the previous hashtag can always be found at the end of the
 hashtag list </h3>
-<h4> Number of Clicks: {{numClicks}} </h4>
+<h4 class = "small font"> Number of Clicks: {{numClicks}} </h4>
+<form method = "post">
+<button type="submit" class="btn btn-default">Restart</button>
+</form> <br>
 <div class = "container">
 {{data}}
 
@@ -35,7 +38,8 @@ hashtag list </h3>
 
 <style>
 .font {font-family: Poiret One}
-.big {font-size: 20px}
+.big {font-size: 25px}
+.small {font-size: 15px}
 .purple {color: #4B088A}
 </style>
 
