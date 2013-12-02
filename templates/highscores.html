@@ -12,11 +12,22 @@ rel="stylesheet" type = "text/css" media="screen"/>
 <body>
 <h1 class = "big font"> High Scores!</h1>
 
+<div class="row">
+  <div class="span2">
 {% for score in scores %}
 
-user: {{score.user}}  time: {{score.time}} <br>
+user: {{score.user}} <br>
 
 {% endfor %}
+  </div>
+  <div class="span2">
+{% for score in scores %}
+
+time: {{score.time}} <br>
+
+{% endfor %}
+  </div>
+</div>
 
 <br>
 <br>
