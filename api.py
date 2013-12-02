@@ -4,7 +4,6 @@ from flask import session, url_for, redirect, render_template, request, flash
 import urllib2
 import json
 from pymongo import MongoClient
-import datetime
 from time import time
 from random import choice
 
@@ -23,9 +22,7 @@ current = ""
 end = ""
 numClicks = 0
 numSeconds = ""
-startingTime = time()
-
-db.scores.remove()
+startingTime = 0
 
 twitter = oauth.remote_app('twitter',
     base_url='https://api.twitter.com/1/',
@@ -70,14 +67,30 @@ def home():
     global start
     global current
     global end
+    global startingTime
     end = ""
     if request.method == "GET":
         return render_template("home.html")
     else:
         start = str(request.form['start'])
         current = start
+        startingTime = time()
         return redirect(url_for('game'))
-    
+
+@app.route("/error", methods = ['GET','POST'])
+def error():
+    global start
+    global current
+    global end
+    global startingTime
+    end = ""
+    if request.method == "GET":
+        return "ERROR: No results. Please try a new search!<br>" + render_template("home.html")
+    else:
+        start = str(request.form['start'])
+        current = start
+        startingTime = time()
+        return redirect(url_for('game'))
 
 @app.route("/game", methods = ['GET','POST'])
 def game():
@@ -88,8 +101,6 @@ def game():
     global numClicks
     global numSeconds
     global startingTime
-    if end == "":
-        end = generateEnd()
 
     result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(current),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
     nicedata = json.loads(result)
@@ -98,6 +109,12 @@ def game():
     numhashtags = 0
     i = 0
     allhashtags = []
+
+    if len(nicedata['statuses']) == 0:
+        return redirect(url_for('error'))
+
+    if end == "":
+        end = generateEnd()
 
     while numhashtags < 10 and i < len(nicedata['statuses']):
         hashtags = separateHashtags(nicedata['statuses'][i]['text'])
