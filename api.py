@@ -21,7 +21,7 @@ previous = ""
 current = ""
 end = ""
 numClicks = 0
-numSeconds = ""
+numSeconds = 0
 startingTime = 0
 
 twitter = oauth.remote_app('twitter',
@@ -65,10 +65,14 @@ def oauth_authorized(resp):
 @app.route("/", methods = ['GET','POST'])
 def home():
     global start
+    global previous
     global current
     global end
+    global numClicks
+    global numSeconds
     global startingTime
-    end = ""
+    start = end = previous = current = ""
+    numClicks = numSeconds = startingTime = 0
     if request.method == "GET":
         return render_template("home.html")
     else:
@@ -80,10 +84,14 @@ def home():
 @app.route("/error", methods = ['GET','POST'])
 def error():
     global start
+    global previous
     global current
     global end
+    global numClicks
+    global numSeconds
     global startingTime
-    end = ""
+    start = end = previous = current = ""
+    numClicks = numSeconds = startingTime = 0
     if request.method == "GET":
         return "ERROR: No results. Please try a new search!<br>" + render_template("home.html")
     else:
@@ -120,7 +128,7 @@ def game():
         hashtags = separateHashtags(nicedata['statuses'][i]['text'])
         if len(hashtags) <= 1:
             i+=1
-        elif (numhashtags + len(hashtags)) <= 10:
+        elif (numhashtags + len(hashtags) - 1) <= 10:
             addTweet = True
             for x in range (0, len(hashtags)):
                 if hashtags[x].lower() in allhashtags:
@@ -138,7 +146,7 @@ def game():
             
     tweets = '<br><br>'.join(tweets)
     tweets = Markup(tweets)
-    if current != start:
+    if previous != "":
         allhashtags.append(previous)
     
     if request.method == "GET":
@@ -158,8 +166,9 @@ def highscore():
     global numSeconds
     global numClicks
     if scores.count() > 50:
-        cursor = db.scores.find(limit=50).sort("time", -1)
-        dictWorst = cursor[0]
+        cursor = db.scores.find(limit=50).sort([("time", -1), ("numClicks",-1)])
+        results = [line for line in cursor]
+        dictWorst = results[0]
         if (numSeconds > int(dictWorst["time"])):
             return redirect(url_for("home"))
         elif (numSeconds == int(dictWorst["time"])) and (numClicks >= int(dictWorst["numClicks"])):
@@ -182,7 +191,7 @@ def highscoreHelper():
 
 @app.route("/leaderboard", methods = ['GET','POST'])
 def leaderboard():
-    cursor = db.scores.find(limit=50).sort("time")
+    cursor = db.scores.find(limit=50).sort([("time",1), ("numClicks",1)])
     results = [line for line in cursor]
     if request.method == "GET":
         return render_template("highscores.html", scores=results)
@@ -203,7 +212,7 @@ def generateEnd():
     global start
     global current
     search = start
-    for j in range(0,1):
+    for j in range(0,2):
         result = twitter.request("https://api.twitter.com/1.1/search/tweets.json?q=%23{0}&lang=en&count=100".format(search),data="",headers=None,format='urlencoded',method='GET',content_type=None,token=get_twitter_token()).raw_data
         nicedata = json.loads(result)
 
@@ -216,22 +225,21 @@ def generateEnd():
             hashtags = separateHashtags(nicedata['statuses'][i]['text'])
             if len(hashtags) <= 1:
                 i+=1
-            elif (numhashtags + (len(hashtags) - 1)) <= 10:
-                numhashtags += (len(hashtags) - 1)
-                i+=1
-
-                for tag in hashtags:
-                    addHashtag = True
-                    if tag.lower() != current.lower():
-                        for alreadyInList in allhashtags:
-                            if tag.lower() == alreadyInList.lower():
-                                addHashtag = False
-                                break
-                        if addHashtag:
-                            allhashtags.append(tag)
+            elif (numhashtags + len(hashtags) - 1) <= 10:
+                addTweet = True
+                for x in range (0, len(hashtags)):
+                    if hashtags[x].lower() in allhashtags:
+                        addTweet = False
+                if addTweet == False:
+                    i+=1
+                else:
+                    numhashtags += (len(hashtags) - 1)
+                    for tag in hashtags:
+                        if tag.lower() != current.lower() and tag.lower() != previous.lower():
+                            allhashtags.append(tag.lower())
             else:
                 i+=1
-        print allhashtags
+
         search = choice(allhashtags)
     return search
 
