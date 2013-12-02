@@ -1,11 +1,11 @@
 proj2-pd7-07-#twitter
 ==================
 
-This is the dev branch
+Give #Twitter any hashtag you want. It will search Twitter for that hashtag, take some tweets containing the hashtag, take a random hashtag from one of those tweets, and then repeat the cycle, finally choosing another hashtag. Your job is to find a path between the two hashtags as quickly as possible using the same method as the program.
 
-This idea is subject to change:
 
-You give it a twitter user. It takes one of their most recent tweets, then finds another tweet that shares a tag with it.
-Then it finds a tweet that shares a different tag with that one, and so on. This will create a chain of tweets (you 
-can specify how long you want the chain to be) that eventually returns a tweet that will likely be unrelated and
-hopefully funny.
+Team:
+Christopher Burke
+Jeremy Karson
+Maia Ezratty
+Shaan Sheikh
