@@ -10,13 +10,26 @@ rel="stylesheet" type = "text/css" media="screen"/>
 </head>
 
 <body>
-<h1 class = "big font"> High Scores!</h1>
+<h1 class = "big purple font"> High Scores!</h1>
 
-{% for score in scores %}
-
-user: {{score.user}}  time: {{score.time}} <br>
-
-{% endfor %}
+<table border="1">
+<tr>
+<td class = "big font">User</td>
+<td class = "big font">Time</td>
+<td class = "big font">Clicks</td>
+</tr>
+<tr>
+<td class = "medium font">{% for score in scores %}
+{{score.user}} <br>
+{% endfor %}</td>
+<td class = "medium font">{% for score in scores %}
+{{score.time}} <br>
+{% endfor %}</td>
+<td class = "medium font">{% for score in scores %}
+{{score.numClicks}} <br>
+{% endfor %}</td>
+</tr>
+</table>
 
 <br>
 <br>
@@ -31,6 +44,8 @@ user: {{score.user}}  time: {{score.time}} <br>
 <style>
 .font {font-family: Poiret One}
 .big {font-size: 30px}
+.medium {font-size: 20px}
+.purple {font color = "#4B088A"}
 </style>
 
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
