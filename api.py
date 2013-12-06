@@ -76,7 +76,7 @@ def home():
     if request.method == "GET":
         return render_template("home.html")
     else:
-        start = str(request.form['start'])
+        start = str(request.form['start']).encode('ascii','ignore')
         current = start
         startingTime = time()
         return redirect(url_for('game'))
@@ -136,7 +136,7 @@ def game():
             if addTweet == False:
                 i+=1
             else:
-                tweets.append(nicedata['statuses'][i]['text'])
+                tweets.append(nicedata['statuses'][i]['text'].encode('ascii','ignore'))
                 numhashtags += (len(hashtags) - 1)
                 for tag in hashtags:
                     if tag.lower() != current.lower() and tag.lower() != previous.lower():
@@ -203,7 +203,7 @@ def separateHashtags(tweet):
     copy = tweet.split('#')
     for i in range(1,len(copy)):
         j = copy[i].split(' ')
-        copy[i] = j[0]
+        copy[i] = j[0].encode('ascii','ignore')
 
     return copy[1:]
 
